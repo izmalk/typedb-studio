@@ -51,7 +51,10 @@ import com.vaticle.typedb.studio.service.connection.TransactionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import mu.KotlinLogging
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.*
+import java.io.File
 
 class GraphArea(transactionState: TransactionState) {
 
@@ -106,9 +109,25 @@ class GraphArea(transactionState: TransactionState) {
         Canvas(Modifier.fillMaxSize().graphicsLayer(scaleX = scale, scaleY = scale)) {
             drawEdges(edges)
             drawVertices(vertices, vertexLabelColor, typography)
+            saveEdges(edges)
+            saveVertices(vertices)
         }
         edges.filter { it.label !in textRenderer.edgeLabelSizes }.forEach { textRenderer.EdgeLabelMeasurer(it) }
         PointerInput.Handler(this, Modifier.fillMaxSize().zIndex(100f))
+    }
+
+    private fun saveEdges(edges: Collection<Edge>) {
+        File("UML-edges.txt").bufferedWriter().use { out ->
+            out.write("-------------------------------")
+            edges.forEach { out.write(it.toString()) }
+        }
+    }
+
+    private fun saveVertices(vertices: Collection<Vertex>) {
+        File("UML-vertices.txt").bufferedWriter().use { out ->
+            out.write("-------------------------------")
+            vertices.forEach { out.write(it.toString()) }
+        }
     }
 
     private fun onLayout(density: Float, layout: LayoutCoordinates) {
